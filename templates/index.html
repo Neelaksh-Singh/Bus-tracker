@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+    <title>Bus Tracker</title>
+</head>
+
+<body>
+    <h1>London Bus Live Map</h1>
+
+    <div id="mapid" style="width: 600px; height: 400px; position:relative; outline:none">
+
+    </div>
+    <script>
+        var mymap = L.map('mapid').setView([51.505, -0.09], 13);
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            maxZoom: 18,
+            id: 'mapbox/streets-v11',
+            tileSize: 512,
+            zoomOffset: -1,
+            accessToken: 'pk.eyJ1IjoibmVlbGFrc2giLCJhIjoiY2tybHNleHRmMTNmNTMxbGl4eG44b2QzZyJ9.bISv-V-kxnCvynDysQHiOA'
+        }).addTo(mymap);
+
+
+        mapMarkers1 = [];
+        mapMarkers2 = [];
+
+        var source = new EventSource('/topic/geodata_final');
+        source.addEventListener('message', function(e) {
+
+            console.log('message');
+            obj = JSON.parse(e.data);
+            console.log(obj);
+
+            if (obj.busline == '00001') {
+                for (var i = 0; i < mapMarkers1.length; i++) {
+                    mymap.removeLayer(mapMarkers1[i]);
+                }
+                marker1 = L.marker([obj.latitude, obj.longitude], {
+                    color: 'red'
+                }).addTo(mymap);
+                mapMarkers1.push(marker1);
+            }
+            if (obj.busline == '00002') {
+                for (var i = 0; i < mapMarkers2.length; i++) {
+                    mymap.removeLayer(mapMarkers2[i]);
+                }
+                marker2 = L.marker([obj.latitude, obj.longitude], {
+                    color: 'green'
+                }).addTo(mymap);
+                mapMarkers2.push(marker2);
+            }
+
+        }, false);
+    </script>
+</body>
+
+</html>
